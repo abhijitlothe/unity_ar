@@ -23,16 +23,18 @@ public class UIScreen : MonoBehaviour
     {
         ScreenState = State.Closed;
     }
+
     public virtual void Open()
     {
+        gameObject.SetActive(true);
         if(OpenAnim != null)
         {
             OpenAnim.Play();
-            OpenAnim.OnAnimComplete += (obj)=>
+            OpenAnim.OnAnimComplete = (obj) =>
             {
-                if(OnOpen !=null)
+                if (OnOpen != null)
                 {
-                    OnOpen.Invoke();  
+                    OnOpen.Invoke();
                 }
                 ScreenState = State.Open;
             };
@@ -44,8 +46,9 @@ public class UIScreen : MonoBehaviour
 		if (CloseAnim != null)
 		{
 			CloseAnim.Play();
-			CloseAnim.OnAnimComplete += (obj) =>
+			CloseAnim.OnAnimComplete = (obj) =>
 			{
+                gameObject.SetActive(false);
                 if(OnClose != null)
                 {
                     OnClose.Invoke();  

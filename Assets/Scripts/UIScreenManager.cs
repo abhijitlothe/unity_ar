@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.Events;
 using Vuforia;
 
-
 public class UIScreenManager : MonoBehaviour, ITrackableEventHandler
 {
     private UIScreen _prevScreen = null;
@@ -22,6 +21,7 @@ public class UIScreenManager : MonoBehaviour, ITrackableEventHandler
 
     public UnityEvent<UIScreen> OnScreenOpen;
     public UnityEvent<UIScreen> OnScreenClose;
+
     private List<UIScreen> _screens = new List<UIScreen>();
 
     /// <summary>
@@ -31,7 +31,6 @@ public class UIScreenManager : MonoBehaviour, ITrackableEventHandler
     {
         if (ImageToTrack)
             ImageToTrack.RegisterTrackableEventHandler(this);
-
     }
 
     private void OnDestroy()
@@ -91,6 +90,7 @@ public class UIScreenManager : MonoBehaviour, ITrackableEventHandler
 
     private void Open(UIScreen aScreen)
     {
+        Debug.Log("Open screen : " + aScreen.gameObject.name);
         _tempScreen = aScreen;
         _tempScreen.Open();
         _tempScreen.OnOpen.AddListener(HandleOpenNewScreen);
@@ -102,11 +102,13 @@ public class UIScreenManager : MonoBehaviour, ITrackableEventHandler
         {
             OnScreenOpen.Invoke(_tempScreen);    
         }
+        _tempScreen.OnOpen.RemoveListener(HandleOpenNewScreen);
         _tempScreen = null;
 	}
 
 	private void Close(UIScreen aScreen)
 	{
+        Debug.Log("Close screen : " + aScreen.gameObject.name);
 		_tempScreen = aScreen;
 		_tempScreen.Close();
 		_tempScreen.OnClose.AddListener(HandleCloseScreen);
@@ -118,6 +120,8 @@ public class UIScreenManager : MonoBehaviour, ITrackableEventHandler
 		{
 			OnScreenClose.Invoke(_tempScreen);
 		}
+        _tempScreen.OnClose.RemoveListener(HandleCloseScreen);
+
 		_tempScreen = null;
 	}
 
@@ -178,6 +182,10 @@ public class UIScreenManager : MonoBehaviour, ITrackableEventHandler
 				{
                     screensToOpen.Add(screen);
 				}
+                else
+                {
+                    screen.gameObject.SetActive(visible); 
+                }
 			}
             else
             {

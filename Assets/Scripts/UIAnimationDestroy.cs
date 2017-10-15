@@ -21,7 +21,6 @@ public class UIAnimationDestroy : UIAnimation
 
     private void UIAnimationDestroyComplete()
     {
-        gameObject.SetActive(false);
         gameObject.transform.localScale = _startingScale;
         HandleOnComplete();
     }

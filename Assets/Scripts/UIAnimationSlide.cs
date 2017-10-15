@@ -15,13 +15,12 @@ public class UIAnimationSlide : UIAnimation
 	public override void Play()
 	{
 		_transform = GetComponent<RectTransform>();
-        _transform.gameObject.SetActive(true);
         _finalPosition = _transform.anchoredPosition3D;
         if(SlideOut)
         {
             //start  behind the target
             _offscreen = Target.anchoredPosition3D;
-            _offscreen.z += 0.05f;
+            _offscreen.x -= 5.0f;
         }
         else
         {
@@ -32,19 +31,24 @@ public class UIAnimationSlide : UIAnimation
             //go behind the target
             _finalPosition.z += 0.5f;
         }
-
+        _transform.anchoredPosition3D = _offscreen;
 		iTween.ValueTo(_transform.gameObject, iTween.Hash(
 			"from", _offscreen,
 			"to", _finalPosition,
 			"time", Duration,
 			"onupdatetarget", this.gameObject,
-			"onupdate", "MoveGuiElement",
-			"oncomplete", "HandleOnComplete"));
+            "onupdate", "UIAnimationSlideGuiElement",
+			"oncomplete", "UIAnimationSlideOnComplete"));
 	}
 
-	public void MoveGuiElement(Vector3 position)
+    public void UIAnimationSlideGuiElement(Vector3 position)
 	{
 		_transform.anchoredPosition3D = position;
 	}
+
+    private void UIAnimationSlideOnComplete()
+    {
+        HandleOnComplete();
+    }
 
 }
