@@ -13,6 +13,7 @@ public class UIAnimationFallFromTop : UIAnimation
         _transform = GetComponent<RectTransform>();
 		_targetPosition = _transform.anchoredPosition3D;
         _offscreen = new Vector3(_targetPosition.x, _targetPosition.y,  40.0f);
+        _transform.anchoredPosition3D = _offscreen;
 		iTween.ValueTo(_transform.gameObject, iTween.Hash(
             "from", _offscreen,
     	    "to", _targetPosition,

@@ -37,6 +37,7 @@ public class UIScreen : MonoBehaviour
                     OnOpen.Invoke();
                 }
                 ScreenState = State.Open;
+                Debug.LogFormat("Screen {0} state is open", gameObject.name);
             };
         }
     }
@@ -49,11 +50,12 @@ public class UIScreen : MonoBehaviour
 			CloseAnim.OnAnimComplete = (obj) =>
 			{
                 gameObject.SetActive(false);
+                ScreenState = State.Closed;
                 if(OnClose != null)
                 {
                     OnClose.Invoke();  
                 }
-                ScreenState = State.Closed;
+                Debug.LogFormat("Screen {0} state is closed", gameObject.name);
 			};
 		}
     }

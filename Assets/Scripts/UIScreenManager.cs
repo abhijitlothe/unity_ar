@@ -23,6 +23,8 @@ public class UIScreenManager : MonoBehaviour, ITrackableEventHandler
     public UnityEvent<UIScreen> OnScreenClose;
 
     private List<UIScreen> _screens = new List<UIScreen>();
+    private bool _initialScreenOpened = false;
+    private bool _toggleVisible;
 
     /// <summary>
     /// Start this instance.
@@ -45,11 +47,18 @@ public class UIScreenManager : MonoBehaviour, ITrackableEventHandler
         {
 
 #if UNITY_EDITOR
-            OpenScreen(InitialScreen);
-#else
-            _screens.Add(InitialScreen);
+            TryOpenInitialScreen();
 #endif
-		}
+        }
+    }
+
+    void TryOpenInitialScreen()
+    {
+        if (!_initialScreenOpened)
+        {
+            _initialScreenOpened = true;
+            OpenScreen(InitialScreen);
+        }
     }
 
     /// <summary>
@@ -59,7 +68,7 @@ public class UIScreenManager : MonoBehaviour, ITrackableEventHandler
     /// <param name="keepCurrent">If set to <c>true</c> keep current.</param>
     public void OpenScreen(UIScreen aScreen)
     {
-        if (_screens.Find((screen)=> screen == aScreen) == null)
+        if (_screens.Find((screen) => screen == aScreen) == null)
         {
             _screens.Add(aScreen);
         }
@@ -68,25 +77,25 @@ public class UIScreenManager : MonoBehaviour, ITrackableEventHandler
         {
             Open(aScreen);
         }
-	}
+    }
 
-	/// <summary>
-	/// Closes the currently open screen.
-	/// </summary>
-	/// <param name="newScreen">New screen.</param>
+    /// <summary>
+    /// Closes the currently open screen.
+    /// </summary>
+    /// <param name="newScreen">New screen.</param>
     public void CloseScreen(UIScreen aScreen)
-	{
-		if (_screens.Find((screen) => screen == aScreen) != null)
-		{
+    {
+        if (_screens.Find((screen) => screen == aScreen) != null)
+        {
             Debug.Log("Close");
-			_screens.Remove(aScreen);
+            _screens.Remove(aScreen);
             Close(aScreen);
-		}
-		else
-		{
-			Debug.LogError("Screen already opened");
-		}
-	}
+        }
+        else
+        {
+            Debug.LogError("Screen already opened");
+        }
+    }
 
     private void Open(UIScreen aScreen)
     {
@@ -96,34 +105,34 @@ public class UIScreenManager : MonoBehaviour, ITrackableEventHandler
         _tempScreen.OnOpen.AddListener(HandleOpenNewScreen);
     }
 
-	void HandleOpenNewScreen()
-	{
-        if(OnScreenOpen != null)
+    void HandleOpenNewScreen()
+    {
+        if (OnScreenOpen != null)
         {
-            OnScreenOpen.Invoke(_tempScreen);    
+            OnScreenOpen.Invoke(_tempScreen);
         }
         _tempScreen.OnOpen.RemoveListener(HandleOpenNewScreen);
         _tempScreen = null;
-	}
+    }
 
-	private void Close(UIScreen aScreen)
-	{
+    private void Close(UIScreen aScreen)
+    {
         Debug.Log("Close screen : " + aScreen.gameObject.name);
-		_tempScreen = aScreen;
-		_tempScreen.Close();
-		_tempScreen.OnClose.AddListener(HandleCloseScreen);
-	}
+        _tempScreen = aScreen;
+        _tempScreen.Close();
+        _tempScreen.OnClose.AddListener(HandleCloseScreen);
+    }
 
-	void HandleCloseScreen()
-	{
+    void HandleCloseScreen()
+    {
         if (OnScreenClose != null)
-		{
-			OnScreenClose.Invoke(_tempScreen);
-		}
+        {
+            OnScreenClose.Invoke(_tempScreen);
+        }
         _tempScreen.OnClose.RemoveListener(HandleCloseScreen);
-
-		_tempScreen = null;
-	}
+        _screens.Remove(_tempScreen);
+        _tempScreen = null;
+    }
 
 
 
@@ -169,22 +178,34 @@ public class UIScreenManager : MonoBehaviour, ITrackableEventHandler
 #if !UNITY_EDITOR
         SetVisibleAll(true);
 #endif
-	}
-
+    }
+#if UNITY_EDITOR
+    void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.H))
+        {
+            SetVisibleAll(false);
+        }
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            SetVisibleAll(true);
+        }
+    }
+#endif
     private void SetVisibleAll(bool visible)
     {
-        List<UIScreen> screensToOpen = new List<UIScreen>();
         _screens.ForEach((screen)=>
         {
             if(visible)
             {
-				if (screen.ScreenState == UIScreen.State.Closed)
+				if (screen.ScreenState == UIScreen.State.Open)
 				{
-                    screensToOpen.Add(screen);
+                    Debug.LogFormat("Screen {0} state is open", screen.gameObject.name);
+                    screen.gameObject.SetActive(visible); 
 				}
                 else
                 {
-                    screen.gameObject.SetActive(visible); 
+                    screen.gameObject.SetActive(false);
                 }
 			}
             else
@@ -193,10 +214,10 @@ public class UIScreenManager : MonoBehaviour, ITrackableEventHandler
             }
         });
 
-        screensToOpen.ForEach((screen)=>
+        if (visible)
         {
-            OpenScreen(screen);
-        });
-
+            TryOpenInitialScreen();
+        }
     }
+
 }
